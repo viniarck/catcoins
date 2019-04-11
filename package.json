@@ -1,0 +1,20 @@
+{
+  "name": "catcoins",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Vinicius Arcanjo <viniarck@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.1",
+    "phaser": "^3.16.2",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.4.3",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0",
+    "phaser3-docs": "git+https://github.com/photonstorm/phaser3-docs.git"
+  },
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack --watch & live-server --port=8086"
+  }
+}
