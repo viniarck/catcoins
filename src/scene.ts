@@ -31,12 +31,13 @@ export class GameScene extends Phaser.Scene {
 
   /** base game method init. */
   init(): void {
+    this.add.rectangle(0, this.game.scale.height, this.game.scale.width * 2, 100, 0x0),
     this.coinsInfo = this.add.text(10, 765, 'Coins left',
-      { font: '20px Arial Bold', fill: '#000000' }),
+      { font: '20px Arial Bold', fill: '#ffffff' }),
       this.levelInfo = this.add.text(140, 765, 'Level',
-        { font: '20px Arial Bold', fill: '#000000' });
+        { font: '20px Arial Bold', fill: '#ffffff' }),
     this.scoreInfo = this.add.text(240, 765, 'Score',
-      { font: '20px Arial Bold', fill: '#000000' });
+      { font: '20px Arial Bold', fill: '#ffffff' });
     this.loadAttrs();
   }
 
@@ -100,7 +101,6 @@ export class GameScene extends Phaser.Scene {
               if (array[i][column] === MazeCell.Ground) {
                 this.coins.create(i * this.brickSize + this.brickSize / 2, column * this.brickSize - this.brickSize / 2, "coin1").play("coin");
                 coinGen = true;
-                this.nCoins += 1;
               }
             }
           }
