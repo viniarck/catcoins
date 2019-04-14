@@ -1,11 +1,10 @@
-
 /** Represents a cell of the Maze. */
-export enum MazeCell { Wall = 0, Ground = 1, Flooded = 2 };
+export enum MazeCell { Wall = 0, Ground = 1, Flooded = 2 }
 
 export class Maze {
-  rows: number;
-  columns: number;
-  maze: Array<Array<MazeCell>> = [];
+  public rows: number;
+  public columns: number;
+  public maze: MazeCell[][] = [];
 
   constructor(width: number, height: number, brickSize = 40) {
     this.rows = width / brickSize;
@@ -16,9 +15,9 @@ export class Maze {
   }
 
   /** Generate a random maze composed of MazeCell.Wall and MazeCell.Ground based on a probability between 0 to 1. */
-  generate(prob: number = 0.03): Array<Array<MazeCell>> {
+  public generate(prob: number = 0.03): MazeCell[][] {
     let maze = this.generate_random(prob);
-    let maxRetries = 1000;
+    const maxRetries = 1000;
     for (let i = 0; i < maxRetries; i++) {
       if (!this.hasGroundIslands(maze)) {
         this.maze = maze;
@@ -32,8 +31,8 @@ export class Maze {
   }
 
   /** Perform a graph search to detect any island composed of MazeCell.Ground. */
-  hasGroundIslands(maze: Array<Array<MazeCell>>): boolean {
-    let m = JSON.parse(JSON.stringify(maze));
+  private hasGroundIslands(maze: MazeCell[][]): boolean {
+    const m = JSON.parse(JSON.stringify(maze));
     for (let i = 0; i < this.rows - 1; i++) {
       for (let j = 1; j < this.columns - 1; j++) {
         if (maze[i][j] === MazeCell.Ground) {
@@ -65,8 +64,8 @@ export class Maze {
   }
 
   /** Generate a random maze composed of MazeCell.Wall and MazeCell.Ground based on a probability between 0 to 1. */
-  private generate_random(prob: number): Array<Array<MazeCell>> {
-    let maze: Array<Array<MazeCell>> = [];
+  private generate_random(prob: number): MazeCell[][] {
+    let maze: MazeCell[][] = [];
     for (let i = 0; i < this.rows; i++) {
       maze[i] = [];
       for (let j = 1; j < this.columns; j++) {

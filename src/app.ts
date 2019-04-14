@@ -5,39 +5,40 @@ const width = 1000;
 const height = 800;
 
 const config: GameConfig = {
-  type: Phaser.AUTO,
-  title: "Pacman",
-  width: width,
-  height: height,
-  parent: "game",
   backgroundColor: "#d3d3d3",
   input: { keyboard: true },
-  scene: [GameScene],
+  height: height,
+  parent: "game",
   physics: {
-    default: "arcade",
     arcade: {
       debug: false
-    }
+    },
+    default: "arcade"
   },
+  scene: [GameScene],
+  title: "Pacman",
+  type: Phaser.AUTO,
+  width: width
 };
 
 // TODO highscores with mongodb
 export class CatcoinsGame extends Phaser.Game {
-  player: Phaser.Physics.Arcade.Sprite
-  score = 0;
-  level = 1;
-  difficultyFactor: 1;
-  coinValue = this.level;
-
+  public player: Phaser.Physics.Arcade.Sprite;
+  public score = 0;
+  public level = 1;
+  public coinValue = this.level;
   // speed values
-  playerSpeed = 100;
-  ghostSpeed = 40;
-
+  public playerSpeed = 100;
+  public ghostSpeed = 40;
   // ghost mistake prob
-  ghostMistakeProb = 0.20;
+  public ghostMistakeProb = 0.20;
+
+  constructor(config: GameConfig) {
+    super(config);
+  }
 
   /** Set the game level. */
-  setLevel(level: number) {
+  public setLevel(level: number) {
     if (level === 1) {
       this.score = 0;
     }
@@ -48,28 +49,23 @@ export class CatcoinsGame extends Phaser.Game {
   }
 
   /** Decrease the likely head by 0.03 in terms of ghosts mistakes. */
-  decreaseGhostMistakeProb() {
-    let prob = this.ghostMistakeProb - 0.03;
+  private decreaseGhostMistakeProb() {
+    const prob = this.ghostMistakeProb - 0.03;
     if (prob >= 0) {
       this.ghostMistakeProb = prob;
     }
   }
 
   /** Set the ghost speed based on a level. */
-  setGhostSpeed(level: number) {
-    this.ghostSpeed = this.level * 4 + 40;
+  private setGhostSpeed(level: number) {
+    this.ghostSpeed = level * 4 + 40;
     if (this.ghostSpeed > this.playerSpeed) {
       this.ghostSpeed = this.playerSpeed;
     }
   }
-
-  constructor(config: GameConfig) {
-    super(config);
-  }
 }
 
-let game: Phaser.Game = undefined;
-
+// bootstrap on window load
 window.onload = () => {
-  game = new CatcoinsGame(config);
+  new CatcoinsGame(config);
 };
