@@ -3,6 +3,7 @@ import { CatcoinsGame } from "./app";
 import { Maze, MazeCell } from "./maze";
 import { genRand, pointDistance } from "./utils";
 export class GameScene extends Phaser.Scene {
+  public game: CatcoinsGame;
   private coinsInfo: Phaser.GameObjects.Text;
   private scoreInfo: Phaser.GameObjects.Text;
   private levelInfo: Phaser.GameObjects.Text;
@@ -13,7 +14,6 @@ export class GameScene extends Phaser.Scene {
   private walls: Phaser.Physics.Arcade.StaticGroup;
   private coins: Phaser.Physics.Arcade.StaticGroup;
   private cursors: Phaser.Input.Keyboard.CursorKeys;
-  private game: CatcoinsGame;
   private player: Phaser.Physics.Arcade.Sprite;
 
   constructor() {
@@ -23,7 +23,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** base game method init. */
-  private init(): void {
+  public init(): void {
     this.add.rectangle(0, this.game.scale.height, this.game.scale.width * 2, 100, 0x0),
       this.coinsInfo = this.add.text(10, 765, "Coins left",
         { font: this.gameFont, fill: "#ffffff" }),
@@ -34,13 +34,8 @@ export class GameScene extends Phaser.Scene {
     this.loadAttrs();
   }
 
-  /** Load game attributes and assign local vars to shorten variable names. */
-  private loadAttrs() {
-    this.player = this.game.player;
-  }
-
   /** base game method preload. */
-  private preload(): void {
+  public preload(): void {
     this.load.image("brick", "assets/brick4040.png");
     this.load.image("player", "assets/cat4040.png");
     this.load.image("ghost1", "assets/ghost4040_1.png");
@@ -51,7 +46,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** base game method create. */
-  private create(): void {
+  public create(): void {
     this.cursors = this.input.keyboard.createCursorKeys();;
     this.anims.create({
       key: "coin",
@@ -122,6 +117,31 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.ghost, this.player, this.ghostCollision, null, this);
     this.physics.add.collider(this.player, this.coins, this.coinCollision, null, this);
     this.updateLabels();
+  }
+
+  /** base game method update. */
+  public update(): void {
+    this.updateLabels();
+    this.chase();
+    if (this.cursors.left.isDown) {
+      this.player.flipX = true;
+      this.player.setVelocityX(-this.game.playerSpeed);
+    } else if (this.cursors.right.isDown) {
+      this.player.flipX = false;
+      this.player.setVelocityX(this.game.playerSpeed);
+    } else if (this.cursors.up.isDown) {
+      this.player.setVelocityY(-this.game.playerSpeed);
+    } else if (this.cursors.down.isDown) {
+      this.player.setVelocityY(this.game.playerSpeed);
+    } else {
+      this.player.setVelocityX(0);
+      this.player.setVelocityY(0);
+    }
+  }
+
+  /** Load game attributes and assign local vars to shorten variable names. */
+  private loadAttrs() {
+    this.player = this.game.player;
   }
 
   /** Set the player position in the second row. */
@@ -244,26 +264,6 @@ export class GameScene extends Phaser.Scene {
           this.ghost.flipX = false;
         }
       }
-    }
-  }
-
-  /** base game method update. */
-  private update(): void {
-    this.updateLabels();
-    this.chase();
-    if (this.cursors.left.isDown) {
-      this.player.flipX = true;
-      this.player.setVelocityX(-this.game.playerSpeed);
-    } else if (this.cursors.right.isDown) {
-      this.player.flipX = false;
-      this.player.setVelocityX(this.game.playerSpeed);
-    } else if (this.cursors.up.isDown) {
-      this.player.setVelocityY(-this.game.playerSpeed);
-    } else if (this.cursors.down.isDown) {
-      this.player.setVelocityY(this.game.playerSpeed);
-    } else {
-      this.player.setVelocityX(0);
-      this.player.setVelocityY(0);
     }
   }
 }
