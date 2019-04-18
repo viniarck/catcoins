@@ -7,14 +7,17 @@
   "devDependencies": {
     "live-server": "^1.2.1",
     "phaser": "^3.16.2",
+    "phaser3-docs": "git+https://github.com/photonstorm/phaser3-docs.git",
     "ts-loader": "^5.3.3",
     "typescript": "^3.4.3",
     "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0",
-    "phaser3-docs": "git+https://github.com/photonstorm/phaser3-docs.git"
+    "webpack-cli": "^3.3.0"
   },
   "scripts": {
     "build": "webpack",
     "start": "webpack --watch & live-server --port=8086"
+  },
+  "dependencies": {
+    "axios": "^0.18.0"
   }
 }
