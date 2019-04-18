@@ -18,10 +18,12 @@ type Driver struct {
 	Coll string
 }
 
+// Create a new driver.
 func NewDriver() *Driver {
 	return &Driver{Host: "localhost:27017", Db: "scoresDb", Coll: "scores"}
 }
 
+// Connect to the MongoDB database
 func (d *Driver) Connect() (*mgo.Collection, error) {
 	session, err := mgo.Dial(d.Host)
 	if err != nil {
@@ -31,6 +33,7 @@ func (d *Driver) Connect() (*mgo.Collection, error) {
 	return c, nil
 }
 
+// Either create or update a high score in the database
 func (d *Driver) CreateOrUpdateScore(score Score) error {
 	coll, err := d.Connect()
 	if err != nil {
@@ -47,4 +50,16 @@ func (d *Driver) CreateOrUpdateScore(score Score) error {
 		}
 	}
 	return nil
+}
+
+// Get the Top n high score records sorted by their values from the database
+func (d *Driver) GetTopRecords(n int) ([]Score, error) {
+	coll, err := d.Connect()
+	if err != nil {
+		return nil, err
+	}
+
+	var res []Score
+	coll.Find(nil).Sort("-value").Limit(n).All(&res)
+	return res, nil
 }

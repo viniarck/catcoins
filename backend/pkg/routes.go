@@ -1,9 +1,11 @@
 package pkg
 
 import (
-	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	cors "github.com/rs/cors/wrapper/gin"
 )
 
 type ScoreStr struct {
@@ -12,20 +14,35 @@ type ScoreStr struct {
 }
 
 type Routes struct {
+	d *Driver
 }
 
+// Start serving the routes.
 func (rt Routes) Serve() {
 	r := gin.Default()
+	r.Use(cors.Default())
+	rt.d = NewDriver()
 	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
+	})
+	r.GET("/scores", func(c *gin.Context) {
+		scores, err := rt.d.GetTopRecords(5)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+		}
+		c.JSON(http.StatusOK, gin.H{"result": scores})
 	})
 	r.POST("/scores", func(c *gin.Context) {
 		score := &ScoreStr{}
 		err := c.BindJSON(score)
-		if err != nil {
-			fmt.Printf("Err: %v", err)
+		val, _ := strconv.Atoi(score.Value)
+		if err == nil {
+			sc := Score{Name: score.Name, Value: val}
+			rt.d.CreateOrUpdateScore(sc)
 		}
 	})
 	r.Run(":8088")
