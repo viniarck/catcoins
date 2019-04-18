@@ -144,7 +144,7 @@ export class GameScene extends Phaser.Scene {
       this.paused = false;
     } else if (Phaser.Input.Keyboard.JustDown(this.sKey)) {
       const getAsync = async () => {
-        const res = await axios.get("http://localhost:8088/scores");
+        const res = await axios.get(`http://${this.game.serverAddr}/scores`);
         const values = res.data.result;
         if (values !== null) {
           let names = "";
@@ -198,13 +198,13 @@ export class GameScene extends Phaser.Scene {
   private async tryToPostHighScore(score: number) {
     const name = this.promptName();
     if (name !== null) {
-      await axios.post("http://localhost:8088/scores", { "name": name, "value": score.toString() });
+      await axios.post(`http://${this.game.serverAddr}/scores`, { "name": name, "value": score.toString() });
     }
   }
 
   private tryToSetHighScore() {
     let getUsers = async () => {
-      const res = await axios.get("http://localhost:8088/scores");
+      const res = await axios.get(`http://${this.game.serverAddr}/scores`);
       const values = res.data.result;
       const score = this.game.score;
       if (values === null) {

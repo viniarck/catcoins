@@ -33,6 +33,8 @@ export class CatcoinsGame extends Phaser.Game {
   public ghostOldVelY = 0;
   // ghost mistake prob
   public ghostMistakeProb = 0.20;
+  // server IP address and port
+  public serverAddr = "35.237.184.43:8088";
 
   constructor(config: GameConfig) {
     super(config);
