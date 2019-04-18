@@ -16,7 +16,7 @@ const config: GameConfig = {
     default: "arcade"
   },
   scene: [GameScene],
-  title: "Pacman",
+  title: "Catcoins",
   type: Phaser.AUTO,
   width: width
 };
@@ -30,6 +30,8 @@ export class CatcoinsGame extends Phaser.Game {
   // speed values
   public playerSpeed = 100;
   public ghostSpeed = 40;
+  public ghostOldVelX = 0;
+  public ghostOldVelY = 0;
   // ghost mistake prob
   public ghostMistakeProb = 0.20;
 

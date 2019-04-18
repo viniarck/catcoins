@@ -7,14 +7,21 @@ export class GameScene extends Phaser.Scene {
   private coinsInfo: Phaser.GameObjects.Text;
   private scoreInfo: Phaser.GameObjects.Text;
   private levelInfo: Phaser.GameObjects.Text;
+  private keysInfo: Phaser.GameObjects.Text;
+  private msgInfo: Phaser.GameObjects.Text;
   private maze: Maze;
   private brickSize = 40;
   private gameFont = "20px Arial Bold";
+  private gameFontBig = "40px Arial Bold";
   private ghost: Phaser.Physics.Arcade.Sprite;
   private walls: Phaser.Physics.Arcade.StaticGroup;
   private coins: Phaser.Physics.Arcade.StaticGroup;
   private cursors: Phaser.Input.Keyboard.CursorKeys;
   private player: Phaser.Physics.Arcade.Sprite;
+  private rKey: Phaser.Input.Keyboard.Key;
+  private pKey: Phaser.Input.Keyboard.Key;
+  private sKey: Phaser.Input.Keyboard.Key;
+  private paused = false;
 
   constructor() {
     super({
@@ -24,13 +31,15 @@ export class GameScene extends Phaser.Scene {
 
   /** base game method init. */
   public init(): void {
-    this.add.rectangle(0, this.game.scale.height, this.game.scale.width * 2, 100, 0x0),
-      this.coinsInfo = this.add.text(10, 765, "Coins left",
-        { font: this.gameFont, fill: "#ffffff" }),
-      this.levelInfo = this.add.text(140, 765, "Level",
-        { font: this.gameFont, fill: "#ffffff" }),
-      this.scoreInfo = this.add.text(240, 765, "Score",
-        { font: this.gameFont, fill: "#ffffff" });
+    this.add.rectangle(0, this.game.scale.height, this.game.scale.width * 2, 100, 0x0);
+    this.coinsInfo = this.add.text(10, 765, "Coins left",
+      { font: this.gameFont, fill: "#ffffff" });
+    this.levelInfo = this.add.text(140, 765, "Level",
+      { font: this.gameFont, fill: "#ffffff" });
+    this.scoreInfo = this.add.text(240, 765, "Score",
+      { font: this.gameFont, fill: "#ffffff" });
+    this.keysInfo = this.add.text(520, 765, " Commands: <p> pause, <r> restart, <s> show high scores",
+      { font: this.gameFont, fill: "#ffffff" });
     this.loadAttrs();
   }
 
@@ -47,7 +56,8 @@ export class GameScene extends Phaser.Scene {
 
   /** base game method create. */
   public create(): void {
-    this.cursors = this.input.keyboard.createCursorKeys();;
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.registerKeys();
     this.anims.create({
       key: "coin",
       frames: [
@@ -116,12 +126,26 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.ghost, this.walls);
     this.physics.add.collider(this.ghost, this.player, this.ghostCollision, null, this);
     this.physics.add.collider(this.player, this.coins, this.coinCollision, null, this);
+    this.msgInfo = this.add.text(this.game.scale.height / 2, this.game.scale.width / 2 - 150, "", { font: this.gameFontBig, fill: "#000000" });
     this.updateLabels();
   }
 
   /** base game method update. */
   public update(): void {
     this.updateLabels();
+
+    if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
+      console.log("r key");
+    } else if (Phaser.Input.Keyboard.JustDown(this.pKey)) {
+      this.togglePause();
+    } else if (Phaser.Input.Keyboard.JustDown(this.sKey)) {
+      console.log("s key");
+    }
+
+    if (this.paused) {
+      return;
+    }
+
     this.chase();
     if (this.cursors.left.isDown) {
       this.player.flipX = true;
@@ -137,6 +161,33 @@ export class GameScene extends Phaser.Scene {
       this.player.setVelocityX(0);
       this.player.setVelocityY(0);
     }
+  }
+
+  private togglePause() {
+
+    const vec = this.ghost.body.velocity;
+    console.log(vec);
+
+    if (!this.paused) {
+      this.game.ghostOldVelX = vec.x;
+      this.game.ghostOldVelY = vec.y;
+      this.ghost.setVelocityY(0);
+      this.ghost.setVelocityX(0);
+      this.paused = true;
+      this.msgInfo.setText("Game Paused");
+    } else {
+      this.ghost.setVelocityX(this.game.ghostOldVelX);
+      this.ghost.setVelocityY(this.game.ghostOldVelY);
+      this.paused = false;
+      this.msgInfo.setText("");
+    }
+  }
+
+  /** Register custom key events. */
+  private registerKeys() {
+    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+    this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+    this.sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
   }
 
   /** Load game attributes and assign local vars to shorten variable names. */
