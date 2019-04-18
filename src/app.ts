@@ -21,7 +21,6 @@ const config: GameConfig = {
   width: width
 };
 
-// TODO highscores with mongodb
 export class CatcoinsGame extends Phaser.Game {
   public player: Phaser.Physics.Arcade.Sprite;
   public score = 0;

@@ -1,4 +1,5 @@
 import "phaser";
+import axios from "axios";
 import { CatcoinsGame } from "./app";
 import { Maze, MazeCell } from "./maze";
 import { genRand, pointDistance } from "./utils";
@@ -22,6 +23,7 @@ export class GameScene extends Phaser.Scene {
   private pKey: Phaser.Input.Keyboard.Key;
   private sKey: Phaser.Input.Keyboard.Key;
   private paused = false;
+  private gameOver = false;
 
   constructor() {
     super({
@@ -38,7 +40,7 @@ export class GameScene extends Phaser.Scene {
       { font: this.gameFont, fill: "#ffffff" });
     this.scoreInfo = this.add.text(240, 765, "Score",
       { font: this.gameFont, fill: "#ffffff" });
-    this.keysInfo = this.add.text(520, 765, " Commands: <p> pause, <r> restart, <s> show high scores",
+    this.keysInfo = this.add.text(500, 765, " Commands: <P> pause, <R> restart, <S> show high scores",
       { font: this.gameFont, fill: "#ffffff" });
     this.loadAttrs();
   }
@@ -135,11 +137,33 @@ export class GameScene extends Phaser.Scene {
     this.updateLabels();
 
     if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
-      console.log("r key");
-    } else if (Phaser.Input.Keyboard.JustDown(this.pKey)) {
-      this.togglePause();
+      this.updateLabels();
+      this.game.setLevel(1);
+      this.scene.start("GameScene");
+      this.gameOver = false;
+      this.paused = false;
     } else if (Phaser.Input.Keyboard.JustDown(this.sKey)) {
-      console.log("s key");
+      const getAsync = async () => {
+        const res = await axios.get("http://localhost:8088/scores");
+        const values = res.data.result;
+        if (values !== null) {
+          let names = "";
+          console.log("values", values);
+          for (const i in values) {
+            names += `${values[i].Name}, ${values[i].Value}\n`;
+          }
+          alert(`Top 5 scores: \n\n${names}`);
+        }
+      };
+      getAsync();
+    }
+
+    if (this.gameOver) {
+      return;
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.pKey)) {
+      this.togglePause();
     }
 
     if (this.paused) {
@@ -161,6 +185,45 @@ export class GameScene extends Phaser.Scene {
       this.player.setVelocityX(0);
       this.player.setVelocityY(0);
     }
+  }
+
+  private promptName(): string {
+    const name = prompt("Congratulations!\nYou made to the top 5 scores.\nEnter your name:");
+    if (name !== null) {
+      return name.substr(0, 40);
+    }
+    return null;
+  }
+
+  private async tryToPostHighScore(score: number) {
+    const name = this.promptName();
+    if (name !== null) {
+      await axios.post("http://localhost:8088/scores", { "name": name, "value": score.toString() });
+    }
+  }
+
+  private tryToSetHighScore() {
+    let getUsers = async () => {
+      const res = await axios.get("http://localhost:8088/scores");
+      const values = res.data.result;
+      const score = this.game.score;
+      if (values === null) {
+        this.tryToPostHighScore(score);
+        return;
+      }
+      const lowestScore = values[values.length - 1];
+      if (values.length < 5 && score > 0) {
+        this.tryToPostHighScore(score);
+        return;
+      }
+      if (lowestScore.hasOwnProperty("Value")) {
+        if (score > 0 && score > lowestScore.Value) {
+          this.tryToPostHighScore(score);
+          return;
+        }
+      }
+    };
+    getUsers();
   }
 
   private togglePause() {
@@ -260,7 +323,6 @@ export class GameScene extends Phaser.Scene {
       }
     })
     if (this.hasWon()) {
-      console.log(this.game.score);
       this.updateLabels();
       this.game.setLevel(this.game.level + 1);
       this.scene.start("GameScene");
@@ -269,9 +331,13 @@ export class GameScene extends Phaser.Scene {
 
   /** Compute ghost collisions with the player. */
   private ghostCollision(): void {
-    alert("over");
-    this.game.setLevel(1);
-    this.scene.start("GameScene");
+    this.gameOver = true;
+    this.ghost.setVelocityY(0);
+    this.ghost.setVelocityX(0);
+    this.player.setVelocityY(0);
+    this.player.setVelocityX(0);
+    this.msgInfo.setText("Game Over!");
+    this.tryToSetHighScore();
   }
 
   /** Make the ghost chase the player by computing the vector distance. The higher the level number, the higher the ghost speeds and also the less likely ghosts will make mistakes in the following the right direction. */
