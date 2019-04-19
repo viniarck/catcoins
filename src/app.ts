@@ -1,5 +1,6 @@
 import "phaser";
 import { GameScene } from "./scene";
+import { ScoreScene } from "./scoreScene";
 
 const width = 1000;
 const height = 800;
@@ -15,7 +16,7 @@ const config: GameConfig = {
     },
     default: "arcade"
   },
-  scene: [GameScene],
+  scene: [GameScene, ScoreScene],
   title: "Catcoins",
   type: Phaser.AUTO,
   width: width
@@ -35,6 +36,8 @@ export class CatcoinsGame extends Phaser.Game {
   public ghostMistakeProb = 0.20;
   // server IP address and port
   public serverAddr = "35.237.184.43:8088";
+  // game status
+  public paused = false;
 
   constructor(config: GameConfig) {
     super(config);

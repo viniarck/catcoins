@@ -22,7 +22,6 @@ export class GameScene extends Phaser.Scene {
   private rKey: Phaser.Input.Keyboard.Key;
   private pKey: Phaser.Input.Keyboard.Key;
   private sKey: Phaser.Input.Keyboard.Key;
-  private paused = false;
   private gameOver = false;
 
   constructor() {
@@ -141,8 +140,10 @@ export class GameScene extends Phaser.Scene {
       this.game.setLevel(1);
       this.scene.start("GameScene");
       this.gameOver = false;
-      this.paused = false;
+      this.game.paused = false;
     } else if (Phaser.Input.Keyboard.JustDown(this.sKey)) {
+      this.game.paused = true;
+      this.game.scene.switch("GameScene", "ScoreScene");
       const getAsync = async () => {
         const res = await axios.get(`http://${this.game.serverAddr}/scores`);
         const values = res.data.result;
@@ -155,7 +156,7 @@ export class GameScene extends Phaser.Scene {
           alert(`Top 5 scores: \n\n${names}`);
         }
       };
-      getAsync();
+      // getAsync();
     }
 
     if (this.gameOver) {
@@ -166,7 +167,7 @@ export class GameScene extends Phaser.Scene {
       this.togglePause();
     }
 
-    if (this.paused) {
+    if (this.game.paused) {
       return;
     }
 
@@ -231,17 +232,17 @@ export class GameScene extends Phaser.Scene {
     const vec = this.ghost.body.velocity;
     console.log(vec);
 
-    if (!this.paused) {
+    if (!this.game.paused) {
       this.game.ghostOldVelX = vec.x;
       this.game.ghostOldVelY = vec.y;
       this.ghost.setVelocityY(0);
       this.ghost.setVelocityX(0);
-      this.paused = true;
+      this.game.paused = true;
       this.msgInfo.setText("Game Paused");
     } else {
       this.ghost.setVelocityX(this.game.ghostOldVelX);
       this.ghost.setVelocityY(this.game.ghostOldVelY);
-      this.paused = false;
+      this.game.paused = false;
       this.msgInfo.setText("");
     }
   }
@@ -301,6 +302,9 @@ export class GameScene extends Phaser.Scene {
     this.updateScoreInfo();
     this.updateCoinsInfo();
     this.updateLevelInfo();
+    if (this.msgInfo.text === "Game Paused" && !this.game.paused) {
+      this.msgInfo.setText("");
+    }
   }
 
   /** Verify whether the user has won the level. */
